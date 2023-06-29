@@ -1,19 +1,47 @@
-# User Module:
+
+# **Plan**
+
+# 1. Create django project:
+
+- Adjust settings
+- Define dirs/urls
+- Set database connection
+- Create WR app
+- Register app at settings.py
+
+# 2. Create models
+
+## User:
+- username
+- email
+- password
+- full_name
+
+## Subscription:
+- city: ForeignKey(Location)
+- user: ForeignKey(User)
+- period: ForeignKey(Period)
+
+## Location:
+- city: String
+- country: String
+
+## Period:
+- period: int _`# 1/2/6/12 hours`_
 
 
-Responsible for user registration, login, and authentication.
-Provides functionalities for user-related actions such as creating subscriptions, edit subscriptions, and delete subscriptions.
+# 3. Create data requesting functionality (Maybe Context-processor)
+- Make 4 groups for each period (1, 2, 6, 12)
+- Every group is filtering needed location to request data
+- Request weather data to undefined service
 
-# Subscription Module:
+# 4. Create Notificator:
+- Receive weather data
+- Send data to defined Users
 
-Manages the creation, storage subscriptions.
-Supports the addition of wishful location to a subscription, choose a notification period.
+# 5. Create API:
+- API views using rest-framework classes
+- Routes
 
-# Weather Data Module:
-
-Filtering required locations by period, request weather data to a third-party service for needed locations.
-
-# Notificator:
-
-Sending weather data to a defined subscribers.
-
+# 6. Modify app with social auth
+- Github/Google oauth

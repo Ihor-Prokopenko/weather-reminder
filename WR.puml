@@ -5,6 +5,8 @@ class User {
     -email: String
     -password: String
     +full_name: String
+
+    register_user()
     create_subscription()
     edit_subscription()
     delete_subscription()
@@ -14,6 +16,7 @@ class Subscription {
     -city: Location
     -user: User
     -notification: Period
+
     change_location()
     change_period()
     send_notification()
@@ -26,6 +29,8 @@ class Location {
 
 class Period {
     +period: int
+
+    get_locations_list()
 }
 
 User "1" *- "many" Subscription : creating >
