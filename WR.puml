@@ -1,0 +1,35 @@
+@startuml
+
+class User {
+    +username: String
+    -email: String
+    -password: String
+    +full_name: String
+    create_subscription()
+    edit_subscription()
+    delete_subscription()
+}
+
+class Subscription {
+    -city: Location
+    -user: User
+    -notification: Period
+    change_location()
+    change_period()
+    send_notification()
+}
+
+class Location {
+    +city: String
+    +country: String
+}
+
+class Period {
+    +period: int
+}
+
+User "1" *- "many" Subscription : creating >
+Subscription "many" -- "1" Period
+Location "1" o-- "many" Subscription
+
+@enduml
