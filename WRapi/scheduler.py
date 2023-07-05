@@ -35,9 +35,6 @@ def add_jobs(period, func):
 
 
 def create_jobs():
-    if schedule and schedule.running:
-        schedule.shutdown()
-
     schedule.print_jobs()
 
     print("Creating jobs...")
