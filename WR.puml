@@ -31,7 +31,6 @@ class Period {
 }
 
 class Notificator {
-
     send_mail()
 }
 
