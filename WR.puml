@@ -6,8 +6,6 @@ class User {
     -password: String
     +full_name: String
 
-    register_user()
-
 }
 
 class Subscription {
@@ -15,27 +13,37 @@ class Subscription {
     -user: User
     -notification: Period
 
-    create_subscription()
-    edit_subscription()
-    delete_subscription()
 }
 
 class Location {
     +city: String
     +country: String
+    +actual_weather
 
-    change_location()
+    update_weather()
 }
 
 class Period {
-    +period: int
+    +interval: int
+    +hours: list
 
-    change_period()
-    get_locations_list()
+
+}
+
+class Notificator {
+
+    send_mail()
+}
+
+class Scheduler {
+    add_task()
 }
 
 User "1" *- "many" Subscription : creating >
-Subscription "many" --o "1" Period
-Location "1" o-- "many" Subscription
+Subscription "many" o-- "1" Period
+Subscription "many" o-- "1" Location
+Notificator --|> Subscription
+Scheduler o-- Notificator
+Scheduler --|> Subscription
 
 @enduml

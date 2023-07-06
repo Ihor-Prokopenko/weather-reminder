@@ -41,7 +41,7 @@ class Subscription(models.Model):
                f"{self.location}({self.location.id}) |" \
                f" {self.period}({self.period.id})"
 
-    def get_sub_info(self):
+    def get_info(self):
         return {
             'user': f"{self.user.username}",
             'location': f"{self.location.city}, {self.location.country}",
