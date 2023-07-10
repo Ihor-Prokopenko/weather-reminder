@@ -22,7 +22,7 @@ class Period(models.Model):
 
 
 class Location(models.Model):
-    city = models.CharField(max_length=100, blank=True)
+    city = models.CharField(max_length=100, blank=True, unique=True)
     country = models.CharField(max_length=100, blank=True)
     actual_weather_data = models.JSONField(blank=True, null=True)
 
@@ -45,5 +45,5 @@ class Subscription(models.Model):
         return {
             'user': f"{self.user.username}",
             'location': f"{self.location.city}, {self.location.country}",
-            'period': f"{self.period.interval} hours"
+            'period': f"{self.period}"
         }

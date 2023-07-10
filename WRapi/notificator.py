@@ -5,28 +5,30 @@ from .weather_getter import get_weather
 
 
 def get_locations(intervals: list = None):
-    if intervals:
-        locations = None
-        for elem in intervals:
-            period_obj = Period.objects.get(interval=elem)
-            period_locations = Location.objects.filter(subscriptions__period=period_obj)
-            if not locations:
-                locations = period_locations
-            else:
-                locations = locations.union(period_locations)
-        return locations
+    if not intervals:
+        return None
+    locations = None
+    for elem in intervals:
+        period_obj = Period.objects.get(interval=elem)
+        period_locations = Location.objects.filter(subscriptions__period=period_obj)
+        if not locations:
+            locations = period_locations
+        else:
+            locations = locations.union(period_locations)
+    return locations
 
 
 def get_subscriptions(intervals: list = None):
-    if intervals:
-        subscriptions = None
-        for elem in intervals:
-            subscriptions_set = Subscription.objects.filter(period__interval=elem)
-            if not subscriptions:
-                subscriptions = subscriptions_set
-            else:
-                subscriptions = subscriptions.union(subscriptions_set)
-        return subscriptions
+    if not intervals:
+        return None
+    subscriptions = None
+    for elem in intervals:
+        subscriptions_set = Subscription.objects.filter(period__interval=elem)
+        if not subscriptions:
+            subscriptions = subscriptions_set
+        else:
+            subscriptions = subscriptions.union(subscriptions_set)
+    return subscriptions
 
 
 def update_weather_data(locations=None):
@@ -68,5 +70,3 @@ def get_mail_data(period: int = None) -> dict:
 def send_mails(period: int = None):
     mails_data = get_mail_data(period)
     data = [(mails_data[mail]['email'], mails_data[mail]['weather']['city']) for mail in mails_data]
-    print(data)
-

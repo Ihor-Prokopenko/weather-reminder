@@ -56,8 +56,3 @@ def update_weather_data(interval=None):
             }
             location.actual_weather = actual_weather_data
             location.save()
-
-        print(location.actual_weather['city'])
-        print(location.actual_weather['country'])
-        print(location.actual_weather['last_updated'])
-        print(location.actual_weather['temperature'])
