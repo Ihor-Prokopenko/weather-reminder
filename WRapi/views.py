@@ -92,7 +92,7 @@ class SubscriptionsAPIView(APIView):
             return Response({'message': 'Unauthorized access...'}, status=status.HTTP_401_UNAUTHORIZED)
 
         if 'location' in request.data:
-            location_obj = Location.objects.filter(Q(city__icontains=request.data['location'])).first()
+            location_obj = get_or_create_location(request.data['location'])
             if not location_obj:
                 return Response({'message': f"Unsupported location '{request.data['location']}'"},
                                 status=status.HTTP_400_BAD_REQUEST)
