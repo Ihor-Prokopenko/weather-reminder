@@ -3,7 +3,7 @@ from django.urls import path
 from django.db.models import Q
 from .models import Subscription, Location, Period
 
-from base.settings import WEATHER_API_KEY, WEATHER_API_BASE_URL
+from base.settings.base import WEATHER_API_KEY, WEATHER_API_BASE_URL
 
 
 def get_weather(city):

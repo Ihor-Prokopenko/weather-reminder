@@ -1,3 +1,4 @@
+from .mail_sender import send_weather
 from .models import Subscription, Location, Period
 from django.db.models import Q
 
@@ -62,6 +63,7 @@ def get_mail_data(period: int = None) -> dict:
     subscriptions = get_subscriptions(intervals)
 
     mails_data = {sub.id: {"email": sub.user.email,
+                           "username": sub.user.username,
                            "weather": sub.location.actual_weather_data} for sub in subscriptions}
 
     return mails_data
@@ -69,4 +71,9 @@ def get_mail_data(period: int = None) -> dict:
 
 def send_mails(period: int = None):
     mails_data = get_mail_data(period)
-    data = [(mails_data[mail]['email'], mails_data[mail]['weather']['city']) for mail in mails_data]
+    for sub_id in mails_data:
+        email = mails_data.get(sub_id).get('email')
+        username = mails_data.get(sub_id).get('username')
+        weather_data = mails_data.get(sub_id).get('weather')
+
+        send_weather(email, username, weather_data)

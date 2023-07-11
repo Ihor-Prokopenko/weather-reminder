@@ -4,9 +4,8 @@ from apscheduler.schedulers.background import BackgroundScheduler, BlockingSched
 from WRapi.models import Period
 from WRapi.notificator import send_mails
 
-TEST_HOUR = 18
-TEST_MINUTE = 58
-
+TEST_HOUR = 11
+TEST_MINUTE = 24
 schedule = BackgroundScheduler()
 
 
