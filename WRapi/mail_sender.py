@@ -25,3 +25,20 @@ def send_weather(email, username, weather_data):
     send_mail(subject, message=message, from_email=email_from, recipient_list=email_to)
 
     return True
+
+
+def notify_new_subscription(notify_body):
+    email_from = EMAIL_HOST_USER
+    email_to = [notify_body.get('email')]
+    subject = "New subscription!"
+
+    plural = 'hour' if notify_body.get('period') == 1 else 'hours'
+
+    message = f"Hello {notify_body.get('username')}! " \
+              f"You just subscribed on weather notification in " \
+              f"{notify_body.get('city')}, {notify_body.get('country')} " \
+              f"for every {notify_body.get('period')} {plural}!"
+
+    send_mail(subject, message=message, from_email=email_from, recipient_list=email_to)
+
+    return True

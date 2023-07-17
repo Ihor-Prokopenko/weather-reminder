@@ -46,6 +46,11 @@ INSTALLED_APPS = [
     'drf_yasg',
 
     'WRapi',
+
+    'django_celery_results',
+    'django_celery_beat',
+    'flower',
+
 ]
 
 MIDDLEWARE = [
@@ -180,7 +185,7 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-
+# WEATHER_API
 WEATHER_API_KEY = os.getenv('WEATHER_API_KEY')
 WEATHER_API_BASE_URL = os.getenv('WEATHER_API_BASE_URL')
 
@@ -193,3 +198,18 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_USE_TLS = True
 EMAIL_USER_SSL = False
+
+# CELERY
+REDIS_PORT = 6379
+
+CELERY_BROKER_URL = f'redis://default:redispw@localhost:{REDIS_PORT}/0'
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60

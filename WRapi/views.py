@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from django.db.models import Q
 from django.forms import model_to_dict
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
 
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
@@ -11,6 +14,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from drf_yasg.utils import swagger_auto_schema
+
+from .tasks import notify_about_subscription
 
 from .models import User, Subscription, Location, Period
 from .serializers import UserSerializer, SubscriptionSerializer
@@ -73,15 +78,24 @@ class SubscriptionsAPIView(APIView):
         if not location_obj:
             return Response({'message': f"Unsupported location '{request.data['location']}'"},
                             status=status.HTTP_400_BAD_REQUEST)
-
+        user = User.objects.get(pk=request.user.id)
         new_subscription = Subscription.objects.create(
-            user=User.objects.get(pk=request.user.id),
+            user=user,
             location=location_obj,
             period=period_obj,
         )
         if not new_subscription:
             return Response({'message': 'There was an error creating subscription...'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        notify_body = {
+            'email': user.email,
+            'username': user.username,
+            'city': location_obj.city,
+            'country': location_obj.country,
+            'period': period_obj.interval,
+        }
+        notify_about_subscription.delay(notify_body)
+
         serializer = SubscriptionSerializer(new_subscription)
         return Response({'subscription': serializer.data})
 
