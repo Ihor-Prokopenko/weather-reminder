@@ -15,11 +15,10 @@ from rest_framework.views import APIView
 
 from drf_yasg.utils import swagger_auto_schema
 
-from .tasks import notify_about_subscription
+from .tasks import notify_new_subscription, get_weather
 
 from .models import User, Subscription, Location, Period
 from .serializers import UserSerializer, SubscriptionSerializer
-from .weather_getter import get_weather
 
 
 def get_or_create_location(city):
@@ -94,7 +93,7 @@ class SubscriptionsAPIView(APIView):
             'country': location_obj.country,
             'period': period_obj.interval,
         }
-        notify_about_subscription.delay(notify_body)
+        notify_new_subscription.delay(notify_body)
 
         serializer = SubscriptionSerializer(new_subscription)
         return Response({'subscription': serializer.data})

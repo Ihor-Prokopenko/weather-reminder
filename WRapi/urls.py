@@ -1,8 +1,6 @@
 from django.urls import path, include
 
 from . import views
-from .mail_sender import send_weather
-from .notificator import send_mails
 from rest_framework_simplejwt import views as jwt_views
 
 from drf_yasg import openapi
