@@ -3,8 +3,10 @@ import requests
 from celery import shared_task
 from celery.schedules import crontab
 from django.core.mail import send_mail
+from django.db import ProgrammingError
+from django.template.loader import render_to_string
 
-from WRapi.models import Period, Location, Subscription
+from wr_api.models import Period, Location, Subscription
 from base.celery import app
 from base.settings.base import WEATHER_API_KEY, WEATHER_API_BASE_URL, EMAIL_HOST_USER
 
@@ -47,7 +49,7 @@ class PeriodDataContainer:
 
 
 @shared_task
-def get_weather(city):
+def get_weather(city: str) -> dict | None:
     api_key = WEATHER_API_KEY
     base_url = WEATHER_API_BASE_URL
     params = {
@@ -64,7 +66,7 @@ def get_weather(city):
 
 
 @shared_task
-def update_weather(location_id):
+def update_weather(location_id: int, subscription_id_list: list):
     location = Location.objects.get(id=location_id)
     weather_data = get_weather(location.city)
     if not weather_data:
@@ -81,11 +83,14 @@ def update_weather(location_id):
     location.actual_weather_data = actual_weather_data
     location.save()
 
+    for subscription_id in subscription_id_list:  # creating send_weather() tasks here to prevent
+        send_weather.delay(subscription_id)        # send_weather() executing before weather updated
+
     return True
 
 
 @shared_task
-def send_weather(subscription_id):
+def send_weather(subscription_id: int):
     subscription_obj = Subscription.objects.get(id=subscription_id)
     if not subscription_obj:
         return False
@@ -95,19 +100,19 @@ def send_weather(subscription_id):
     subject = "Your weather!"
 
     weather_data = subscription_obj.location.actual_weather_data
-    city = f"{weather_data.get('city')}"
-    region = f", {weather_data.get('region')}" if weather_data.get('region') else ''
-    country = f", {weather_data.get('country')}" if weather_data.get('country') else ''
-    temperature = f"temperature - {weather_data.get('temperature')}"
-    condition = f"condition - {weather_data.get('condition')}"
-    wind = f"wind - {weather_data.get('wind')}"
-    last_updated = f"Actual on {weather_data.get('last_updated')}"
 
-    message = f"Hello {subscription_obj.user.username}! Here is your weather in {city}{region}{country}: \n\n" \
-              f"{temperature}\n" \
-              f"{condition}\n" \
-              f"{wind}\n" \
-              f"{last_updated}\n"
+    context = {
+        'username': subscription_obj.user.username,
+        'city': weather_data.get('city'),
+        'region': weather_data.get('region'),
+        'country': weather_data.get('country'),
+        'temperature': weather_data.get('temperature'),
+        'condition': weather_data.get('condition'),
+        'wind': weather_data.get('wind'),
+        'last_updated': weather_data.get('last_updated'),
+    }
+
+    message = render_to_string('email_templates/weather_notification.html', context)
 
     sent = send_mail(subject, message=message, from_email=email_from, recipient_list=email_to)
     if not sent:
@@ -117,17 +122,20 @@ def send_weather(subscription_id):
 
 
 @shared_task
-def notify_new_subscription(notify_body):
+def notify_new_subscription(notify_body: dict):
     email_from = EMAIL_HOST_USER
     email_to = [notify_body.get('email')]
     subject = "New subscription!"
 
-    plural = 'hour' if notify_body.get('period') == 1 else 'hours'
+    context = {
+        'username': notify_body.get('username'),
+        'city': notify_body.get('city'),
+        'country': notify_body.get('country'),
+        'period': notify_body.get('period'),
+        'plural_hours': 'hour' if notify_body.get('period') == 1 else 'hours',
+        }
 
-    message = f"Hello {notify_body.get('username')}! " \
-              f"You just subscribed on weather notification in " \
-              f"{notify_body.get('city')}, {notify_body.get('country')} " \
-              f"for every {notify_body.get('period')} {plural}!"
+    message = render_to_string('email_templates/new_subscription.html', context)
 
     sent = send_mail(subject, message=message, from_email=email_from, recipient_list=email_to)
     if not sent:
@@ -143,11 +151,10 @@ def notify_by_interval(interval):
     if not period_data.is_valid:
         return f"{interval} interval does not exist..."
 
-    for location in period_data.locations:              # passed location id because celery
-        update_weather.delay(location.id)               # does not send QuerySet as argument
-
-    for subscription in period_data.subscriptions:
-        send_weather.delay(subscription.id)
+    for location in period_data.locations:
+        subscription_id_list = [subscription.id for subscription in
+                                 period_data.subscriptions.filter(location=location)]
+        update_weather.delay(location.id, subscription_id_list)
 
     return True
 
@@ -158,12 +165,17 @@ def get_beat_schedule():
     beat_schedule = {}
     for period in periods:
         beat_schedule[period.__str__()] = {
-            'task': 'WRapi.tasks.notify_by_interval',
-            'schedule': crontab(hour=period.hours, minute='44'),
+            'task': 'wr_api.tasks.notify_by_interval',
+            'schedule': crontab(hour=period.hours, minute='52'),
             'args': (int(period.interval),),
         }
 
     return beat_schedule
 
 
-app.conf.beat_schedule = get_beat_schedule()
+try:
+    app.conf.beat_schedule = get_beat_schedule()
+except ProgrammingError as e:
+    print("Error: Relation 'WRapi_period' does not exist.")
+except Exception as e:
+    print("Error: ", str(e))

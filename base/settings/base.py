@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
 
-    'WRapi',
+    'wr_api',
+
 
     'django_celery_results',
     'django_celery_beat',
@@ -91,7 +92,7 @@ WSGI_APPLICATION = 'base.wsgi.application'
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-AUTH_USER_MODEL = 'WRapi.User'
+AUTH_USER_MODEL = 'wr_api.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -10,7 +10,7 @@ class User(AbstractUser):
 
 
 class Period(models.Model):
-    interval = models.IntegerField()
+    interval = models.IntegerField(unique=True)
     hours = models.CharField(max_length=255)
 
     def __str__(self):
@@ -44,6 +44,6 @@ class Subscription(models.Model):
     def get_info(self):
         return {
             'user': f"{self.user.username}",
-            'location': f"{self.location.city}, {self.location.country}",
+            'location': f"{self.location.city}",
             'period': f"{self.period}"
         }

@@ -1,0 +1,6 @@
+Hello {{ username|safe }}, here is your weather in {{ city|safe }}, {% if region %}{{ region|safe }}, {% endif %} {{ country|safe }}:
+Temperature: {{ temperature|safe }}
+Condition: {{ condition|safe }}
+Wind: {{ wind|safe }}
+
+Actual on {{ last_updated|safe }}.

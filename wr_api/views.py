@@ -21,7 +21,7 @@ from .models import User, Subscription, Location, Period
 from .serializers import UserSerializer, SubscriptionSerializer
 
 
-def get_or_create_location(city):
+def get_or_create_location(city: str) -> Location | None:
     weather_data = get_weather(city)
     if not weather_data:
         return None
