@@ -10,7 +10,7 @@ services:
     volumes:
       - .:/wrapi
     ports:
-      - "8000:8000"
+      - "8000"
     depends_on:
       - db
     environment:
@@ -69,7 +69,7 @@ services:
 
   flower:
     build:
-      context: /flower/
+      context: ./flower/
     image: flower2
     container_name: flower_container
     command: >
@@ -104,13 +104,28 @@ services:
   redis:
     image: redis:7-alpine
     container_name: wrapi_redis
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
     networks:
       - wrapi_network
 
+  nginx:
+    image: nginx:latest
+    container_name: wrapi_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d
+    depends_on:
+      - web
+    networks:
+      - wrapi_network
+
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   wrapi_network:
