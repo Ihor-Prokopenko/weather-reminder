@@ -2,13 +2,13 @@ version: '3'
 services:
   web:
     build:
-      context: .
+      context: ./weather_reminder
     image: wrapi_image
     container_name: wrapi_container
     command: >
       bash -c "python manage.py migrate && python manage.py create_periods && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/wrapi
+      - ./weather_reminder:/weather_reminder
     ports:
       - "8000"
     depends_on:
@@ -24,13 +24,13 @@ services:
 
   celery_worker:
     build:
-      context: .
+      context: ./weather_reminder
     image: wrapi_image
     container_name: celery_worker_container
     command: >
       bash -c "celery -A base worker --loglevel=info -P eventlet"
     volumes:
-      - .:/wrapi
+      - ./weather_reminder:/weather_reminder
     depends_on:
       - db
       - redis
@@ -46,13 +46,13 @@ services:
 
   celery_beat:
     build:
-      context: .
+      context: ./weather_reminder
     image: wrapi_image
     container_name: celery_beat_container
     command: >
       bash -c "celery -A base beat --loglevel=info"
     volumes:
-      - .:/wrapi
+      - ./weather_reminder:/weather_reminder
     depends_on:
       - db
       - redis
@@ -75,7 +75,7 @@ services:
     command: >
       bash -c "celery --broker=redis://wrapi_redis:6379/0 flower --port=5555"
     volumes:
-      - .:/wrapi
+      - ./weather_reminder:/weather_reminder
     depends_on:
       - db
       - redis
