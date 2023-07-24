@@ -1,0 +1,117 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+    image: wrapi_image
+    container_name: wrapi_container
+    command: >
+      bash -c "python manage.py migrate && python manage.py create_periods && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/wrapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=wrapi_postgres
+      - POSTGRES_USER=wrapi_user
+      - POSTGRES_PASSWORD=wrapi_password
+      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
+    networks:
+      - wrapi_network
+
+  celery_worker:
+    build:
+      context: .
+    image: wrapi_image
+    container_name: celery_worker_container
+    command: >
+      bash -c "celery -A base worker --loglevel=info -P eventlet"
+    volumes:
+      - .:/wrapi
+    depends_on:
+      - db
+      - redis
+      - web
+    networks:
+      - wrapi_network
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=wrapi_postgres
+      - POSTGRES_USER=wrapi_user
+      - POSTGRES_PASSWORD=wrapi_password
+      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
+
+  celery_beat:
+    build:
+      context: .
+    image: wrapi_image
+    container_name: celery_beat_container
+    command: >
+      bash -c "celery -A base beat --loglevel=info"
+    volumes:
+      - .:/wrapi
+    depends_on:
+      - db
+      - redis
+      - web
+      - celery_worker
+    networks:
+      - wrapi_network
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=wrapi_postgres
+      - POSTGRES_USER=wrapi_user
+      - POSTGRES_PASSWORD=wrapi_password
+      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
+
+  flower:
+    build:
+      context: /flower/
+    image: flower2
+    container_name: flower_container
+    command: >
+      bash -c "celery --broker=redis://wrapi_redis:6379/0 flower --port=5555"
+    volumes:
+      - .:/wrapi
+    depends_on:
+      - db
+      - redis
+      - web
+      - celery_worker
+      - celery_beat
+    ports:
+      - "5555:5555"
+    networks:
+      - wrapi_network
+
+  db:
+    image: postgres:15.3
+    container_name: wrapi_postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=wrapi_postgres
+      - POSTGRES_USER=wrapi_user
+      - POSTGRES_PASSWORD=wrapi_password
+    ports:
+      - "5432:5432"
+    networks:
+      - wrapi_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: wrapi_redis
+    ports:
+      - "6379:6379"
+    networks:
+      - wrapi_network
+
+volumes:
+  postgres_data:
+
+networks:
+  wrapi_network:
+    driver: bridge

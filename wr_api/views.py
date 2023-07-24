@@ -149,3 +149,7 @@ class RegistrationAPIView(APIView):
         user = serializer.save()
         return Response({'message': "Registration successful!",
                          'user_info': f"{user.username}, {user.email}"}, status=status.HTTP_201_CREATED)
+
+
+def check_server(request):
+    return HttpResponse("Everything is OK...", status.HTTP_200_OK)

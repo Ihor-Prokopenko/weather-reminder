@@ -4,6 +4,7 @@ from celery import shared_task
 from celery.schedules import crontab
 from django.core.mail import send_mail
 from django.db import ProgrammingError
+from django.db.models import Q
 from django.template.loader import render_to_string
 
 from wr_api.models import Period, Location, Subscription
@@ -152,8 +153,9 @@ def notify_by_interval(interval):
         return f"{interval} interval does not exist..."
 
     for location in period_data.locations:
+
         subscription_id_list = [subscription.id for subscription in
-                                 period_data.subscriptions.filter(location=location)]
+                                 period_data.subscriptions if subscription.location == location]
         update_weather.delay(location.id, subscription_id_list)
 
     return True
@@ -166,7 +168,7 @@ def get_beat_schedule():
     for period in periods:
         beat_schedule[period.__str__()] = {
             'task': 'wr_api.tasks.notify_by_interval',
-            'schedule': crontab(hour=period.hours, minute='52'),
+            'schedule': crontab(hour=period.hours, minute='43'),
             'args': (int(period.interval),),
         }
 

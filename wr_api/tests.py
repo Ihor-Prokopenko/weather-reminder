@@ -7,7 +7,7 @@ from rest_framework.test import APIClient
 from wr_api.models import User, Period
 
 
-class SecureAPITest(TestCase):
+class APITest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.token = str(AccessToken.for_user(self.user))
