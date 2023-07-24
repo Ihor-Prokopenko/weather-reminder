@@ -168,7 +168,7 @@ def get_beat_schedule():
     for period in periods:
         beat_schedule[period.__str__()] = {
             'task': 'wr_api.tasks.notify_by_interval',
-            'schedule': crontab(hour=period.hours, minute='43'),
+            'schedule': crontab(hour=period.hours, minute='0'),
             'args': (int(period.interval),),
         }
 

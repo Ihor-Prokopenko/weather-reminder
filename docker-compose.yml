@@ -10,9 +10,10 @@ services:
     volumes:
       - ./weather_reminder:/weather_reminder
     ports:
-      - "8000"
+      - "8000:8000"
     depends_on:
       - db
+      - redis
     environment:
       - POSTGRES_HOST=db
       - POSTGRES_DB=wrapi_postgres
