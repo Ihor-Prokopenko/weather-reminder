@@ -28,7 +28,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '0.0.0.0', '127.0.0.1', '10.182.0.2', '34.16.158.186']
 
 
 # Application definition
@@ -115,7 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Kiev'
 
 USE_I18N = True
 
@@ -193,9 +193,9 @@ EMAIL_USE_TLS = True
 EMAIL_USER_SSL = False
 
 # CELERY
-REDIS_PORT = 6379
+REDIS_PORT = os.getenv('REDIS_PORT')
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 

@@ -14,12 +14,6 @@ services:
     depends_on:
       - db
       - redis
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB=wrapi_postgres
-      - POSTGRES_USER=wrapi_user
-      - POSTGRES_PASSWORD=wrapi_password
-      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
     networks:
       - wrapi_network
 
@@ -38,12 +32,6 @@ services:
       - web
     networks:
       - wrapi_network
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB=wrapi_postgres
-      - POSTGRES_USER=wrapi_user
-      - POSTGRES_PASSWORD=wrapi_password
-      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
 
   celery_beat:
     build:
@@ -61,12 +49,6 @@ services:
       - celery_worker
     networks:
       - wrapi_network
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB=wrapi_postgres
-      - POSTGRES_USER=wrapi_user
-      - POSTGRES_PASSWORD=wrapi_password
-      - CELERY_BROKER_URL=redis://wrapi_redis:6379/0
 
   flower:
     build:
@@ -94,9 +76,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=wrapi_postgres
-      - POSTGRES_USER=wrapi_user
-      - POSTGRES_PASSWORD=wrapi_password
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     networks:

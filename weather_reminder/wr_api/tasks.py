@@ -26,12 +26,11 @@ class PeriodDataContainer:
     def get_locations(self):
         locations = None
         for interval in self.existing_intervals:
-            period_obj = Period.objects.get(interval=interval)
-            period_locations = Location.objects.filter(subscriptions__period=period_obj)
+            period_locations = Location.objects.filter(subscriptions__period__interval=interval)
             if not locations:
                 locations = period_locations
             else:
-                locations.union(period_locations)
+                locations = locations.union(period_locations)
             if interval == self.interval:
                 break
         return locations
@@ -171,7 +170,6 @@ def get_beat_schedule():
             'schedule': crontab(hour=period.hours, minute='0'),
             'args': (int(period.interval),),
         }
-
     return beat_schedule
 
 
